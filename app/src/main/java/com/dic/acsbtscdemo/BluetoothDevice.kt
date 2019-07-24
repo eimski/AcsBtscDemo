@@ -16,11 +16,12 @@ import kotlinx.android.synthetic.main.component_bluetooth_device.view.*
 class BtDevice(context:Context) : LinearLayout(context){
 
     private var viewModel = BluetoothViewModel()
-    private var btDevice:BluetoothDevice? = null
+    private lateinit var btDevice:BluetoothDevice
     init{
         View.inflate(context, R.layout.component_bluetooth_device, this)
         buttonPair.setOnClickListener {
-            if(!btDevice!!.name.contains("ACR1255U")){
+
+            if(!btDevice.name.contains("ACR1255U")){
                 Toast.makeText(context, "Device not supported", Toast.LENGTH_SHORT).show()
             }
             else{

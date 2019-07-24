@@ -32,20 +32,24 @@ import kotlinx.android.synthetic.main.fragment_scan_devices.*
 class OptionsMenu: Fragment() {
 
     private var viewModel = BluetoothViewModel()
-    //private val masterKey:ByteArray = byteArrayOfInts(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_options,container,false)
         initUi(view)
         val scanButton = view.findViewById<View>(R.id.btn_ScanBluetooth)
         scanButton.setOnClickListener{
             buttonEffect(it)
-            //(activity as MainActivity).setViewPager(1)
-            (activity as MainActivity).replaceViewFragment(1)
-
+            if(BluetoothInstance.gatt == null){
+                //(activity as MainActivity).setViewPager(1)
+                (activity as MainActivity).replaceViewFragment(1)
+            }
+            else{
+                BluetoothInstance.gatt!!.disconnect()
+            }
         }
 
         val showDemoButton = view.findViewById<View>(R.id.buttonDemoImage)
         showDemoButton.setOnClickListener {
+            BluetoothInstance.enablePolling()
         }
         connectReader()
         return view
@@ -53,8 +57,6 @@ class OptionsMenu: Fragment() {
 
     private fun initUi(view:View){
         val pairDevice = view.findViewById<TextView>(R.id.lblPairedDevice)
-        var battLevel = view.findViewById<TextView>(R.id.lblBattery)
-        val status = view.findViewById<TextView>(R.id.lblStatus)
 
         if(BluetoothInstance.device == null){
             pairDevice.text = "unknown"
@@ -79,44 +81,33 @@ class OptionsMenu: Fragment() {
         }
     }
 
-    private fun showBatteryLevel(view:View){
-        val battText = view.findViewById<TextView>(R.id.lblBattery)
-        (BluetoothInstance.reader as Acr1255uj1Reader)
-            .setOnBatteryLevelChangeListener{ btReader:BluetoothReader, batteryLvl:Int ->
-            battText.text = batteryLvl.toString() + "%"
-        }
-    }
-
-    private fun showDeviceName(){
-
-    }
-
-    private fun showStatus(message:String){
-
-    }
-
     private fun connectReader(): Boolean {
 
         if(BluetoothInstance.device == null)
             return false
 
 
+        /*if(BluetoothInstance.gatt != null){
+            if(BluetoothInstance.gatt!!.getConnectionState(BluetoothInstance.device) == BluetoothGatt.STATE_CONNECTED)
+                return true
+        }*/
+
         val btCallback = BluetoothReaderGattCallback()
         btCallback.setOnConnectionStateChangeListener { gatt, state, newState ->
-            var msg = ""
+
             if (newState == BluetoothReader.STATE_CONNECTED) {
                 if (BluetoothInstance.readerManager != null) {
-                    BluetoothInstance.readerManager!!.detectReader(
-                        gatt, btCallback
-                    )
+                    BluetoothInstance.readerManager!!.detectReader(gatt, btCallback)
+                    BluetoothInstance.gatt = gatt
                 }
-                msg = "Attempting to start service discovery:" + gatt.discoverServices()
+                val msg = "Attempting to start service discovery: " + gatt.discoverServices()
+                updateStatus(msg)
             } else if (newState == BluetoothReader.STATE_DISCONNECTED) {
-                //onDisconnected(gatt);
-                msg = "Disconnected from GATT server."
+                BluetoothInstance.gatt!!.close()
+                val msg = "Disconnected from GATT server."
+                showToast(msg)
+                (activity as MainActivity).replaceViewFragment(1)
             }
-
-            //Toast.makeText(this!!, msg, Toast.LENGTH_SHORT).show()
         }
 
         BluetoothInstance.readerManager = BluetoothReaderManager()
@@ -124,38 +115,66 @@ class OptionsMenu: Fragment() {
             BluetoothInstance.reader = it
             (BluetoothInstance.reader as Acr1255uj1Reader).enableNotification(true)
             BluetoothInstance.reader!!.setOnEnableNotificationCompleteListener{reader, errorCode ->
-                /*val status = view!!.findViewById<TextView>(R.id.lblStatus)
-                if(errorCode == BluetoothGatt.GATT_SUCCESS)
-                    status.text = "The device is unable to set notification"
-                    //Toast.makeText(view1.context, "The device is ready to use", Toast.LENGTH_SHORT).show()
-                else
-                    status.text = "The device is unable to set notification"*/
 
-                val authOk = BluetoothInstance.reader!!.authenticate(BluetoothInstance.masterKey)
-                if (authOk) {
-                    // Toast.makeText(context, "Authentication Successful!", Toast.LENGTH_SHORT).show()
-                }
+                if(errorCode == BluetoothGatt.GATT_SUCCESS)
+                    showToast("The device is ready to use")
+                else
+                    showToast("The device is unable to set notification")
+
+                //authenticate device
+                BluetoothInstance.reader!!.authenticate(BluetoothInstance.masterKey)
             }
 
             BluetoothInstance.reader!!.setOnAuthenticationCompleteListener{ reader, errorCode ->
 
-                Toast.makeText(activity, "Hello", Toast.LENGTH_SHORT).show()
-                //val status = view!!.findViewById<TextView>(R.id.lblStatus)
                 if (errorCode == BluetoothReader.ERROR_SUCCESS) {
-                    //status.text = "Authentication successful"
+                    updateStatus("Authentication successful")
                 } else {
-                    //status.text = "Authentication fail"
+                    updateStatus("Authentication fail")
                 }
             }
+
+            BluetoothInstance.reader!!.setOnCardStatusChangeListener{ reader, cardStatus ->
+                if(cardStatus == BluetoothReader.CARD_STATUS_PRESENT){
+                    updateStatus("Card present")
+                }else{
+                    updateStatus("Card not detected")
+                }
+            }
+
+            (BluetoothInstance.reader as Acr1255uj1Reader)
+                .setOnBatteryLevelAvailableListener { _: BluetoothReader, batteryLvl: Int, status: Int ->
+                    activity!!.runOnUiThread {
+                        val batteryText = this.view!!.findViewById<TextView>(R.id.lblBattery)
+                        batteryText.text = batteryLvl.toString() + "%"
+                    }
+                }
+
+            (BluetoothInstance.reader as Acr1255uj1Reader)
+                .setOnBatteryLevelChangeListener { _: BluetoothReader, batteryLvl: Int ->
+                    activity!!.runOnUiThread {
+                        val batteryText = this.view!!.findViewById<TextView>(R.id.lblBattery)
+                        batteryText.text = batteryLvl.toString() + "%"
+                    }
+                }
         }
         val device = BluetoothInstance.adapter?.getRemoteDevice(BluetoothInstance.device!!.address)
         val btGatt:BluetoothGatt = device!!.connectGatt(context, false, btCallback)
-        val isConnect = btGatt.connect()
+        btGatt.connect()
         return true
     }
 
-    fun Context.toast(message: String){
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun showToast(message:String){
+        activity!!.runOnUiThread {
+            Toast.makeText(this.context,message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateStatus(message:String){
+        activity!!.runOnUiThread {
+            val status = this.view!!.findViewById<TextView>(R.id.lblStatus)
+            status.text =  message
+        }
     }
 }
 

@@ -274,14 +274,16 @@ class CommandBuilder {
 
     companion object {
         val COMMAND_DATA_WRITE = 0xB0.toByte()
+        val COMMAND_SHOW_DEMO = 0x30.toByte()
         val COMMAND_CHANGE_SECURITY_CODE = 0xBD.toByte()
 
-        private val COMMAND_DATA_READ = 0xC0.toByte()
-        private val COMMAND_CLEAR = 0xA1.toByte()
-        private val COMMAND_SHOW_DISPLAY_OLD = 0xA0.toByte()
-        private val COMMAND_SAVE_LAYOUT = 0xB2.toByte()
-        private val COMMAND_SHOW_DISPLAY = 0xA2.toByte()
-        private val COMMAND_SHOW_DISPLAY3 = 0xA3.toByte()
+        val COMMAND_DATA_READ = 0xC0.toByte()
+        val COMMAND_CHECK_STATUS = 0xD0.toByte()
+        val COMMAND_CLEAR = 0xA1.toByte()
+        val COMMAND_SHOW_DISPLAY_OLD = 0xA0.toByte()
+        val COMMAND_SAVE_LAYOUT = 0xB2.toByte()
+        val COMMAND_SHOW_DISPLAY = 0xA2.toByte()
+        val COMMAND_SHOW_DISPLAY3 = 0xA3.toByte()
 
         val SECURITY_CODE_TYPE1: Byte = 1
         val SECURITY_CODE_TYPE2: Byte = 2

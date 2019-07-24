@@ -79,7 +79,6 @@ class ScanDevices : Fragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewModel = ViewModelProviders.of(activity!!).get(BluetoothViewModel::class.java)
         val view = inflater.inflate(R.layout.fragment_scan_devices, container, false)
-
         initBluetooth()
         return view
     }
@@ -89,7 +88,6 @@ class ScanDevices : Fragment(){
         BluetoothInstance.adapter!!.bluetoothLeScanner.stopScan(scanCallback)
     }
 
-    private val masterKey:ByteArray = byteArrayOfInts(0x41, 0x43, 0x52, 0x31, 0x32, 0x35, 0x35, 0x55, 0x2D, 0x4A, 0x31, 0x20, 0x41, 0x75, 0x74, 0x68)
     private fun initBluetooth(){
         if (!activity!!.packageManager!!.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(

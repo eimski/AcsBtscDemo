@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     private var mBluetoothAdapter: BluetoothAdapter? = null
     private var mHandler: Handler? = null
     private var viewPager:ViewPager? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar!!.hide()
@@ -31,6 +30,19 @@ class MainActivity : AppCompatActivity() {
 
         //via fragmentManager
         replaceViewFragment(0)
+    }
+
+    override fun onBackPressed() {
+
+        val menuFragment = supportFragmentManager.findFragmentByTag("OptionsMenu")
+        if (menuFragment == null){
+            Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show()
+            replaceViewFragment(0)
+        }
+        else{
+            super.onBackPressed()
+        }
+
     }
 
     //init fragment pager
@@ -48,9 +60,10 @@ class MainActivity : AppCompatActivity() {
     fun replaceViewFragment(fragmentNum:Int){
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         when(fragmentNum){
-            0-> { fragmentTransaction.replace(android.R.id.content, OptionsMenu())}
-            1-> { fragmentTransaction.replace(android.R.id.content, ScanDevices())}
+            0-> { fragmentTransaction.replace(android.R.id.content, OptionsMenu(), "OptionsMenu")}
+            1-> { fragmentTransaction.replace(android.R.id.content, ScanDevices(), "ScanDevices")}
         }
         fragmentTransaction.commit()
     }
+
 }
