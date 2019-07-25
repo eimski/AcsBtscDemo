@@ -2,15 +2,10 @@ package com.dic.acsbtscdemo
 
 import java.util.ArrayList
 
-/**
- * Imprements the creation of the command.
- * @author AIOI SYSTEMS CO., LTD.
- * @version 1.2.0
- */
 class CommandBuilder {
 
-    var maxBlocks = 8
-    private var mSeq: Byte = 0
+    var maxBlocks = 12
+    private var mSeq: Byte = 1
 
     private var mSecCode1: ByteArray? = null
     private var mSecCode2: ByteArray? = null
@@ -19,7 +14,13 @@ class CommandBuilder {
     private val nextSeq: Byte
         get() {
             val result = mSeq
-            mSeq++
+            if(mSeq == 255.toByte()){
+                mSeq = 1
+            }
+            else{
+                mSeq++
+            }
+
             return result
         }
 
@@ -88,7 +89,8 @@ class CommandBuilder {
             if (functionData.size % 16 > 0) {
                 //functionDataは16で割り切れるようにする
                 dataBlocks++
-                innerData = ByteArray(dataBlocks * 16)
+                //innerData = ByteArray(dataBlocks * 16) error here
+                innerData!!.plus(functionData)
                 System.arraycopy(functionData, 0, innerData, 0, functionData.size)
             } else {
                 innerData = functionData
@@ -161,7 +163,7 @@ class CommandBuilder {
      * @param functionData
      * @return
      */
-    fun buildDataWriteCommand(startAdress: Int, functionData: ByteArray?): ArrayList<ByteArray> {
+    fun buildDataWriteCommand(startAddress: Int, functionData: ByteArray?): ArrayList<ByteArray> {
         val unit = maxBlocks * 16 - 16
         val splitCount = (functionData!!.size + unit - 1) / unit
 
@@ -196,16 +198,16 @@ class CommandBuilder {
                 cmd[6] = 0x30
                 cmd[7] = 0x30
             }
-            //Adress
-            val adress = startAdress + offset
-            val hAByte = (adress shr 8).toByte()
-            val lAByte = (adress and 0x00FF).toByte()
+            //Address
+            val address = startAddress + offset
+            val hAByte = (address shr 8).toByte()
+            val lAByte = (address and 0x00FF).toByte()
 
             //Length
             val hLByte = (dataLen shr 8).toByte()
             val lLByte = (dataLen and 0x00FF).toByte()
-
             val paramData = byteArrayOf(hAByte, lAByte, hLByte, lLByte, 0, 0, 0, 0)
+
             //set function parameter data.
             System.arraycopy(paramData, 0, cmd, 8, paramData.size)
             //set function data.

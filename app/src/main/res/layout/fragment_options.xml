@@ -181,8 +181,8 @@
             app:layout_constraintVertical_bias="0.0"/>
     <TextView
             android:text="status pending..."
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="162dp"
+            android:layout_height="16dp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="16dp"
             android:id="@+id/lblStatus" android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toTopOf="@+id/guideline" android:fontFamily="monospace"
