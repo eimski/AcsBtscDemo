@@ -19,6 +19,8 @@ class MainActivity : AppCompatActivity() {
     private var mBluetoothAdapter: BluetoothAdapter? = null
     private var mHandler: Handler? = null
     private var viewPager:ViewPager? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar!!.hide()
@@ -40,6 +42,8 @@ class MainActivity : AppCompatActivity() {
             replaceViewFragment(0)
         }
         else{
+            BluetoothInstance.disablePolling()
+            BluetoothInstance.gatt?.disconnect()
             super.onBackPressed()
         }
 

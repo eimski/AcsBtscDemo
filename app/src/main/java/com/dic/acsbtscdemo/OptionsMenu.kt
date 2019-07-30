@@ -29,12 +29,25 @@ import kotlinx.android.synthetic.main.fragment_options.*
 
 import kotlinx.android.synthetic.main.fragment_scan_devices.*
 
+object test{
+    fun onStateChange(){
+
+    }
+}
+
 class OptionsMenu: Fragment() {
+    object onStatusMessageListener{
+        fun statusMessage(){
+
+        }
+    }
 
     private var viewModel = BluetoothViewModel()
+    private lateinit var core:SmartTagCore
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_options,container,false)
-        initUi(view)
+
+        initUi(view)//TODO:investigate scan button
         val scanButton = view.findViewById<View>(R.id.btn_ScanBluetooth)
         scanButton.setOnClickListener{
             buttonEffect(it)
@@ -47,9 +60,37 @@ class OptionsMenu: Fragment() {
             }
         }
 
-        val showDemoButton = view.findViewById<View>(R.id.buttonDemoImage)
+        val showDemoButton = view.findViewById<Button>(R.id.buttonDemoImage)
         showDemoButton.setOnClickListener {
+            if(::core.isInitialized){
+                core.process = SmartTagCore.Process.ShowDemo
+            }
             BluetoothInstance.enablePolling()
+        }
+        val clearDisplayButton = view.findViewById<Button>(R.id.buttonClearDisplay)
+        clearDisplayButton.setOnClickListener {
+            if(::core.isInitialized){
+                core.process = SmartTagCore.Process.ClearDisplay
+            }
+            BluetoothInstance.enablePolling()
+        }
+        val memoryWriteButton = view.findViewById<Button>(R.id.buttonWriteMemory)
+        memoryWriteButton.setOnClickListener {
+            if(::core.isInitialized){
+                core.process = SmartTagCore.Process.WriteData
+            }
+            BluetoothInstance.enablePolling()
+        }
+        val memoryReadButton = view.findViewById<Button>(R.id.buttonReadMemory)
+        memoryReadButton.setOnClickListener {
+            if(::core.isInitialized){
+                core.process = SmartTagCore.Process.ReadUserData
+            }
+            BluetoothInstance.enablePolling()
+        }
+        val createNameTagButton = view.findViewById<Button>(R.id.buttonCreateNameTag)
+        createNameTagButton.setOnClickListener {
+            //TODO: Create a Name Tag Creation Module
         }
         connectReader()
         return view
@@ -86,12 +127,6 @@ class OptionsMenu: Fragment() {
         if(BluetoothInstance.device == null)
             return false
 
-
-        /*if(BluetoothInstance.gatt != null){
-            if(BluetoothInstance.gatt!!.getConnectionState(BluetoothInstance.device) == BluetoothGatt.STATE_CONNECTED)
-                return true
-        }*/
-
         val btCallback = BluetoothReaderGattCallback()
         btCallback.setOnConnectionStateChangeListener { gatt, state, newState ->
 
@@ -113,6 +148,7 @@ class OptionsMenu: Fragment() {
         BluetoothInstance.readerManager = BluetoothReaderManager()
         BluetoothInstance.readerManager!!.setOnReaderDetectionListener {
             BluetoothInstance.reader = it
+            core = SmartTagCore()
             (BluetoothInstance.reader as Acr1255uj1Reader).enableNotification(true)
             BluetoothInstance.reader!!.setOnEnableNotificationCompleteListener{reader, errorCode ->
 
@@ -137,6 +173,10 @@ class OptionsMenu: Fragment() {
             BluetoothInstance.reader!!.setOnCardStatusChangeListener{ reader, cardStatus ->
                 if(cardStatus == BluetoothReader.CARD_STATUS_PRESENT){
                     updateStatus("Card present")
+                    if(::core.isInitialized){
+                        core.startProcess()
+                    }
+                    //TODO: subscribe callback from SmartTagCore
                 }else{
                     updateStatus("Card not detected")
                 }

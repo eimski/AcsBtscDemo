@@ -79,6 +79,7 @@ class ScanDevices : Fragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewModel = ViewModelProviders.of(activity!!).get(BluetoothViewModel::class.java)
         val view = inflater.inflate(R.layout.fragment_scan_devices, container, false)
+        BluetoothInstance.device = null
         initBluetooth()
         return view
     }

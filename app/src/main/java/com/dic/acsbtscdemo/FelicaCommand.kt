@@ -22,7 +22,7 @@ class FelicaCommand {
         var len = 13 + blockList.count() + (BLOCKSIZE * blocks)
 
         if(addLength){
-            len+1
+            len+=1
         }
 
         var packet = ByteArray(len)
