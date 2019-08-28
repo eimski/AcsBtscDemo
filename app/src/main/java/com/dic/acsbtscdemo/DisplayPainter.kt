@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
-import android.graphics.Paint.FontMetrics
 import android.graphics.Point
 import kotlin.experimental.or
 
@@ -154,7 +153,8 @@ class DisplayPainter {
         }
 
         val canvas = Canvas(previewImage!!)
-        canvas.drawBitmap(bitmap, x.toFloat(), y.toFloat(), null)
+        canvas.drawBitmap(bitmap, x.toFloat(), y.toFloat(), Paint())
+
     }
 
     companion object {

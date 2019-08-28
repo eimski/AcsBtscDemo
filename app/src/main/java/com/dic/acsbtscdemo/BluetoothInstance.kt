@@ -2,6 +2,7 @@ package com.dic.acsbtscdemo
 
 import android.bluetooth.*
 import android.content.Context
+import android.widget.TextView
 import android.widget.Toast
 
 import com.acs.bluetooth.Acr1255uj1Reader
@@ -16,13 +17,16 @@ class BluetoothInstance{
 
         var adapter:BluetoothAdapter? = null
         var device:BluetoothDevice? = null
-        var manager:BluetoothManager? = null
+        var btCallback:BluetoothReaderGattCallback = BluetoothReaderGattCallback()
+        var core:SmartTagCore? = null
+
 
         var reader:BluetoothReader? = null
-        var readerManager:BluetoothReaderManager? = null
+        var readerManager:BluetoothReaderManager? = BluetoothReaderManager()
         var gatt:BluetoothGatt? = null
         val masterKey:ByteArray = byteArrayOfInts(0x41, 0x43, 0x52, 0x31, 0x32, 0x35, 0x35, 0x55, 0x2D, 0x4A, 0x31, 0x20, 0x41, 0x75, 0x74, 0x68)
 
+        var prevFragmentId = MainActivity.FragmentId.OptionsMenu
 
         fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
 
@@ -35,6 +39,7 @@ class BluetoothInstance{
             val cmd = byteArrayOfInts(0xE0, 0x00, 0x00, 0x40, 0x00)
             this.reader?.transmitEscapeCommand(cmd)
         }
+
     }
 
 }

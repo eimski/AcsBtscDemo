@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AcsBtscDemo</string>
-    <string name="btn_ScanBluetooth">Scan Devices</string>
+    <string name="app_name">AIOI Smartcard</string>
+    <string name="version">v1.1</string>
     <string name="error_bluetooth_le_not_supported">Bluetooth LE not supported</string>
 </resources>

@@ -5,14 +5,14 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".OptionsMenu">
+        tools:context=".OptionsMenu" android:background="@drawable/background">
 
     <ImageButton
             android:layout_width="110dp"
             android:layout_height="40dp" app:srcCompat="@android:drawable/stat_sys_data_bluetooth"
             android:id="@+id/btn_ScanBluetooth"
             android:tint="#FBFBFC"
-            android:background="#3F51B5" android:contentDescription="@string/btn_ScanBluetooth"
+            android:background="@drawable/button_bluetooth"
             style="@android:style/Widget.ImageButton"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toTopOf="@+id/guideline" android:layout_marginTop="8dp"
@@ -62,7 +62,8 @@
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintEnd_toStartOf="@+id/imageButton18"
                         android:layout_margin="8dp" android:paddingLeft="8dp" android:paddingRight="8dp"
-                        android:text="Memory Write"/>
+                        android:background="@drawable/button_roundcorners"
+                        android:text="Memory Write" android:fontFamily="casual" android:textColor="#FFFFFF"/>
                 <Button
                         android:layout_width="114dp"
                         android:layout_height="match_parent" tools:srcCompat="@tools:sample/avatars"
@@ -71,7 +72,8 @@
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintEnd_toStartOf="@+id/scrollView_main"
                         android:layout_margin="8dp" android:paddingLeft="8dp" android:paddingRight="8dp"
-                        android:text="Memory Read"/>
+                        android:background="@drawable/button_roundcorners"
+                        android:text="Memory Read" android:fontFamily="casual" android:textColor="#FFFFFF"/>
             </LinearLayout>
             <LinearLayout
                     android:orientation="horizontal"
@@ -93,7 +95,8 @@
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintEnd_toStartOf="@id/buttonCreateNameTag"
                         android:layout_margin="8dp" android:paddingLeft="8dp" android:paddingRight="8dp"
-                        android:text="Demo Image"/>
+                        android:background="@drawable/button_roundcorners"
+                        android:text="Demo Image" android:fontFamily="casual" android:textColor="#FFFFFF"/>
                 <Button
                         android:layout_width="114dp"
                         android:layout_height="match_parent" tools:srcCompat="@tools:sample/avatars"
@@ -102,7 +105,8 @@
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintEnd_toStartOf="@+id/scrollView_main"
                         android:layout_margin="8dp" android:paddingLeft="8dp" android:paddingRight="8dp"
-                        android:text="Create Name Tag"/>
+                        android:background="@drawable/button_roundcorners"
+                        android:text="Create Name Tag" android:fontFamily="casual" android:textColor="#FFFFFF"/>
             </LinearLayout>
             <LinearLayout
                     android:orientation="horizontal"
@@ -124,7 +128,8 @@
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintEnd_toStartOf="@+id/imageButton18"
                         android:layout_margin="8dp" android:paddingLeft="8dp" android:paddingRight="8dp"
-                        android:text="Clear Display"/>
+                        android:background="@drawable/button_roundcorners"
+                        android:text="Clear Display" android:fontFamily="casual" android:textColor="#FFFFFF"/>
                 <Button
                         android:layout_width="114dp"
                         android:layout_height="match_parent" tools:srcCompat="@tools:sample/avatars"
@@ -133,6 +138,7 @@
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintEnd_toStartOf="@+id/scrollView_main"
                         android:layout_margin="8dp" android:paddingLeft="8dp" android:paddingRight="8dp"
+                        android:background="@drawable/button_roundcorners"
                         android:visibility="invisible"/>
             </LinearLayout>
         </LinearLayout>
@@ -142,56 +148,65 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="16dp"
-            android:id="@+id/textView" android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/title" android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
             android:layout_marginBottom="8dp" app:layout_constraintBottom_toTopOf="@+id/scrollView_main"
             app:layout_constraintEnd_toStartOf="@+id/btn_ScanBluetooth" android:layout_marginEnd="8dp"
-            android:fontFamily="monospace" android:textSize="18sp" app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintVertical_bias="0.071"/>
+            android:fontFamily="casual" android:textSize="18sp" app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintVertical_bias="0.071" android:textStyle="bold" android:textColor="#F57F17"/>
     <TextView
             android:text="Battery Level:"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="16dp"
-            android:id="@+id/textView3"
+            android:id="@+id/batterylevel"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:layout_constraintTop_toBottomOf="@+id/title"
             app:layout_constraintBottom_toTopOf="@+id/scrollView_main" app:layout_constraintVertical_bias="0.126"
-    />
+            android:fontFamily="casual" android:textColor="#000000"/>
     <TextView
             android:text="Paired Device:"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="16dp"
-            android:id="@+id/textView4"
-            app:layout_constraintTop_toBottomOf="@+id/textView3"
+            android:id="@+id/paireddevice"
+            app:layout_constraintTop_toBottomOf="@+id/batterylevel"
             android:layout_marginBottom="8dp" app:layout_constraintBottom_toTopOf="@+id/guideline"
             app:layout_constraintVertical_bias="0.0"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp" android:fontFamily="casual" android:textColor="#000000"/>
     <TextView
             android:text="0%"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/lblBattery"
-            app:layout_constraintStart_toEndOf="@+id/textView3" android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:layout_constraintStart_toEndOf="@+id/batterylevel" android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/title"
             app:layout_constraintBottom_toTopOf="@+id/scrollView_main"
-            app:layout_constraintVertical_bias="0.126"/>
+            app:layout_constraintVertical_bias="0.126" android:fontFamily="casual" android:textColor="#000000"/>
     <TextView
             android:text="Unknown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/lblPairedDevice"
-            app:layout_constraintStart_toEndOf="@+id/textView4" android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@+id/paireddevice" android:layout_marginStart="12dp"
             android:layout_marginBottom="24dp" app:layout_constraintBottom_toTopOf="@+id/guideline"
             app:layout_constraintTop_toBottomOf="@+id/lblBattery" android:layout_marginTop="8dp"
-            app:layout_constraintVertical_bias="0.0"/>
+            app:layout_constraintVertical_bias="0.0" android:fontFamily="casual" android:textColor="#000000"/>
     <TextView
             android:text="status pending..."
             android:layout_width="162dp"
             android:layout_height="16dp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="16dp"
             android:id="@+id/lblStatus" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/guideline" android:fontFamily="monospace"
-            android:textSize="10sp" android:textStyle="italic" app:layout_constraintTop_toBottomOf="@+id/textView4"
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintBottom_toTopOf="@+id/guideline" android:fontFamily="casual"
+            android:textSize="10sp" android:textStyle="italic" app:layout_constraintTop_toBottomOf="@+id/paireddevice"
+            android:layout_marginTop="8dp" android:textColor="#000000"/>
+    <TextView
+            android:text="@string/version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/version" app:layout_constraintStart_toEndOf="@+id/title" android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent" android:fontFamily="casual"
+            android:textSize="18sp" android:textColor="#F57F17" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/scrollView_main" app:layout_constraintVertical_bias="0.08"
+            android:textStyle="bold"/>
 </android.support.constraint.ConstraintLayout>

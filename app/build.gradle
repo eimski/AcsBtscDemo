@@ -5,7 +5,18 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 28
+    signingConfigs {
+release {
+storeFile file('C:\\Users\\DIC03\\Desktop\\android keystore\\dic03keystore.jks')
+storePassword 'admin123'
+keyAlias = 'key0'
+    storePassword 'admin123'
+    keyPassword 'admin123'
+    storePassword 'admin123'
+keyPassword 'admin123'
+keyPassword 'admin123'}
+}
+compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.acsbtscdemo"
         minSdkVersion 21
@@ -18,6 +29,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

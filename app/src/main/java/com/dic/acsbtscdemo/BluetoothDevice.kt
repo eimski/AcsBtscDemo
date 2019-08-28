@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.component_bluetooth_device.view.*
 
 class BtDevice(context:Context) : LinearLayout(context){
 
-    private var viewModel = BluetoothViewModel()
     private lateinit var btDevice:BluetoothDevice
     init{
         View.inflate(context, R.layout.component_bluetooth_device, this)
@@ -26,7 +25,7 @@ class BtDevice(context:Context) : LinearLayout(context){
             }
             else{
                 //(context as MainActivity).setViewPager(0)
-                (context as MainActivity).replaceViewFragment(0)
+                (context as MainActivity).replaceViewFragment(MainActivity.FragmentId.OptionsMenu)
                 BluetoothInstance.device = btDevice
 
             }
