@@ -2,6 +2,11 @@ package com.dic.acsbtscdemo
 
 import java.util.ArrayList
 
+/**
+ * Implements functions to create a AIOI smartcard command
+ * @author AIOI SYSTEMS CO., LTD.
+ * @version 1.0.0
+ */
 class CommandBuilder {
 
     var maxBlocks = 12
@@ -68,7 +73,6 @@ class CommandBuilder {
      * Divides command into some frames if necessary.
      * @param functionNo
      * @param paramData
-     * @param innerData
      * @return
      * @throws Exception
      */
@@ -80,14 +84,14 @@ class CommandBuilder {
 
         var dataBlocks: Int
         var innerData: ByteArray? = null
-        var splitCount = 0
+        val splitCount:Int
         if (functionData == null) {
             dataBlocks = 0
             splitCount = 1
         } else {
             dataBlocks = functionData.size / 16
             if (functionData.size % 16 > 0) {
-                //functionDataは16で割り切れるようにする
+                //functionData be divisible by 16
                 dataBlocks++
                 //innerData = ByteArray(dataBlocks * 16) error here
                 innerData!!.plus(functionData)
@@ -95,23 +99,22 @@ class CommandBuilder {
             } else {
                 innerData = functionData
             }
-            //フレーム分割数
+            //number of frame divisions
             splitCount = getSplitCount(dataBlocks)
         }
 
         val result = ArrayList<ByteArray>()
         var offset = 0
-        var frameBlocks = 0
+        var frameBlocks:Int
         for (i in 0 until splitCount) {
             val dataLen: Int
             if (i == splitCount - 1) {
                 //last frame
                 frameBlocks = getLastBlockCount(dataBlocks) + 1
-                //Common.addLogi(String.format("last block count = %d", frameBlocks));
-                if (innerData == null) {
-                    dataLen = 0
+                dataLen = if (innerData == null) {
+                    0
                 } else {
-                    dataLen = innerData.size - offset
+                    innerData.size - offset
                 }
             } else {
                 frameBlocks = maxBlocks
@@ -159,7 +162,6 @@ class CommandBuilder {
     /**
      * Creates a command to write user data.
      * Divides command into some frames if necessary.
-     * @param startAdress
      * @param functionData
      * @return
      */
@@ -169,8 +171,8 @@ class CommandBuilder {
 
         val result = ArrayList<ByteArray>()
         var offset = 0
-        var dataLen = (maxBlocks - 1) * 16//ヘッダを除いたデータのみのサイズ
-        var frameBlocks = 0
+        var dataLen = (maxBlocks - 1) * 16//size of data without header
+        var frameBlocks:Int
         for (i in 0 until splitCount) {
             if (i == splitCount - 1) {
                 //last block
@@ -210,10 +212,10 @@ class CommandBuilder {
 
             //set function parameter data.
             System.arraycopy(paramData, 0, cmd, 8, paramData.size)
+
             //set function data.
-            if (functionData != null) {
-                System.arraycopy(functionData, offset, cmd, 16, dataLen)
-            }
+            System.arraycopy(functionData, offset, cmd, 16, dataLen)
+
             result.add(cmd)
 
             offset += dataLen
@@ -248,16 +250,14 @@ class CommandBuilder {
      * @return
      */
     private fun getSecurityCode(functionNo: Byte, paramData: ByteArray): ByteArray? {
-        var code: ByteArray? = null
-        when (functionNo) {
-            COMMAND_SHOW_DISPLAY_OLD, COMMAND_SHOW_DISPLAY, COMMAND_SHOW_DISPLAY3, COMMAND_CLEAR, COMMAND_SAVE_LAYOUT -> code =
+        return when (functionNo) {
+            COMMAND_SHOW_DISPLAY_OLD, COMMAND_SHOW_DISPLAY, COMMAND_SHOW_DISPLAY3, COMMAND_CLEAR, COMMAND_SAVE_LAYOUT ->
                 mSecCode1
-            COMMAND_DATA_WRITE -> code = mSecCode2
-            COMMAND_DATA_READ -> code = mSecCode3
-            COMMAND_CHANGE_SECURITY_CODE -> code = getSecurityCodeByType(paramData[0])
-            else -> code = byteArrayOf(0x30, 0x30, 0x30)
+            COMMAND_DATA_WRITE -> mSecCode2
+            COMMAND_DATA_READ -> mSecCode3
+            COMMAND_CHANGE_SECURITY_CODE -> getSecurityCodeByType(paramData[0])
+            else -> byteArrayOf(0x30, 0x30, 0x30)
         }
-        return code
     }
 
     /**
@@ -275,20 +275,20 @@ class CommandBuilder {
     }
 
     companion object {
-        val COMMAND_DATA_WRITE = 0xB0.toByte()
-        val COMMAND_SHOW_DEMO = 0x30.toByte()
-        val COMMAND_CHANGE_SECURITY_CODE = 0xBD.toByte()
+        const val COMMAND_DATA_WRITE = 0xB0.toByte()
+        const val COMMAND_SHOW_DEMO = 0x30.toByte()
+        const val COMMAND_CHANGE_SECURITY_CODE = 0xBD.toByte()
 
-        val COMMAND_DATA_READ = 0xC0.toByte()
-        val COMMAND_CHECK_STATUS = 0xD0.toByte()
-        val COMMAND_CLEAR = 0xA1.toByte()
-        val COMMAND_SHOW_DISPLAY_OLD = 0xA0.toByte()
-        val COMMAND_SAVE_LAYOUT = 0xB2.toByte()
-        val COMMAND_SHOW_DISPLAY = 0xA2.toByte()
-        val COMMAND_SHOW_DISPLAY3 = 0xA3.toByte()
+        const val COMMAND_DATA_READ = 0xC0.toByte()
+        const val COMMAND_CHECK_STATUS = 0xD0.toByte()
+        const val COMMAND_CLEAR = 0xA1.toByte()
+        const val COMMAND_SHOW_DISPLAY_OLD = 0xA0.toByte()
+        const val COMMAND_SAVE_LAYOUT = 0xB2.toByte()
+        const val COMMAND_SHOW_DISPLAY = 0xA2.toByte()
+        const val COMMAND_SHOW_DISPLAY3 = 0xA3.toByte()
 
-        val SECURITY_CODE_TYPE1: Byte = 1
-        val SECURITY_CODE_TYPE2: Byte = 2
-        val SECURITY_CODE_TYPE3: Byte = 3
+        const val SECURITY_CODE_TYPE1: Byte = 1
+        const val SECURITY_CODE_TYPE2: Byte = 2
+        const val SECURITY_CODE_TYPE3: Byte = 3
     }
 }

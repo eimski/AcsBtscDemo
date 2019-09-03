@@ -12,10 +12,16 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.*
 import kotlinx.android.synthetic.main.fragment_create_tag.*
-
+/**
+ * Tag to create name tag fragment
+ * @author DIC
+ * @version 1.0.0
+ */
 class CreateTag: Fragment() {
 
     private lateinit var photo: Bitmap
+
+    //Can be any number. Not used but a requirement for android function
     private val REQUEST_IMAGE_CAPTURE = 1
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -105,6 +111,7 @@ class CreateTag: Fragment() {
         return dp.localDisplayImage
     }
 
+    //Convert string text into bmp and scale them to fit limited spaces
     private fun textToBmp(text:String, fontsize:Int, maxTextWidth:Int, backgroundFill:Boolean): Bitmap {
 
         val paint = Paint()

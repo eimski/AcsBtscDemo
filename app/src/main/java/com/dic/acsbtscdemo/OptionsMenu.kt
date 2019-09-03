@@ -1,5 +1,6 @@
 package com.dic.acsbtscdemo
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.bluetooth.*
 import android.content.DialogInterface
@@ -17,19 +18,24 @@ import android.widget.*
 import com.acs.bluetooth.*
 import kotlin.concurrent.thread
 
-
+/**
+ * Tag to main options menu fragment
+ * @author DIC
+ * @version 1.0.0
+ */
 class OptionsMenu: Fragment() {
 
     private lateinit var messageHandler:Handler
     private lateinit var progressBar: ProgressBar
     private lateinit var progressDialog:AlertDialog
     private lateinit var progressText:TextView
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_options,container,false)
 
         messageHandler = object:Handler(Looper.getMainLooper()){
             override fun handleMessage(msg: Message?) {
-
+                //show toast or alert box depending on message type
                 when(msg?.what){
                     SmartTagCore.MessageType.Toast.value->
                         Toast.makeText(context, msg.obj.toString(), Toast.LENGTH_SHORT).show()
@@ -123,6 +129,7 @@ class OptionsMenu: Fragment() {
             title.setTextColor(Color.parseColor("#F57F17"))
             title.textSize = 18.00f
 
+            //checks if bluetooth reader is ready and show alert box if it is
             if (BluetoothInstance.gatt != null) {
                 val dialog = AlertDialog.Builder(context)
                     .setCustomTitle(title)
@@ -156,6 +163,8 @@ class OptionsMenu: Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        //defines progress bar UI. It will be called from SmartTagCore class
         val progressLayout = LayoutInflater.from(context).inflate(R.layout.progressbar,null)
         progressBar = progressLayout.findViewById(R.id.progressBarHorizontal)
         progressText = progressLayout.findViewById(R.id.progressInfo)
@@ -195,6 +204,7 @@ class OptionsMenu: Fragment() {
         scrollview?.startAnimation(btt)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initUi(view:View){
         val pairDevice = view.findViewById<TextView>(R.id.lblPairedDevice)
         if(BluetoothInstance.device == null){
@@ -223,6 +233,8 @@ class OptionsMenu: Fragment() {
         }
     }
 
+    //All event listeners for ACR1255U reader
+    @SuppressLint("SetTextI18n")
     private fun setListeners(): Boolean {
         if(BluetoothInstance.device == null)
             return false
@@ -248,7 +260,7 @@ class OptionsMenu: Fragment() {
             BluetoothInstance.reader = it
             BluetoothInstance.core = SmartTagCore(messageHandler)
             (BluetoothInstance.reader as Acr1255uj1Reader).enableNotification(true)
-            BluetoothInstance.reader!!.setOnEnableNotificationCompleteListener{reader, errorCode ->
+            BluetoothInstance.reader!!.setOnEnableNotificationCompleteListener{_, errorCode ->
 
                 if(errorCode == BluetoothGatt.GATT_SUCCESS)
                     showToast("The device is ready to use")
@@ -259,7 +271,7 @@ class OptionsMenu: Fragment() {
                 BluetoothInstance.reader!!.authenticate(BluetoothInstance.masterKey)
             }
 
-            BluetoothInstance.reader!!.setOnAuthenticationCompleteListener{ reader, errorCode ->
+            BluetoothInstance.reader!!.setOnAuthenticationCompleteListener{ _, errorCode ->
 
                 if (errorCode == BluetoothReader.ERROR_SUCCESS) {
                     updateStatus("Authentication successful")
@@ -268,7 +280,7 @@ class OptionsMenu: Fragment() {
                 }
             }
 
-            BluetoothInstance.reader!!.setOnCardStatusChangeListener{ reader, cardStatus ->
+            BluetoothInstance.reader!!.setOnCardStatusChangeListener{ _, cardStatus ->
                 if(cardStatus == BluetoothReader.CARD_STATUS_PRESENT){
                     updateStatus("Card present")
                     if(BluetoothInstance.core != null){
@@ -282,10 +294,10 @@ class OptionsMenu: Fragment() {
             }
 
             (BluetoothInstance.reader as Acr1255uj1Reader)
-                .setOnBatteryLevelAvailableListener { _: BluetoothReader, batteryLvl: Int, status: Int ->
+                .setOnBatteryLevelAvailableListener { _: BluetoothReader, batteryLvl: Int, _: Int ->
                     activity!!.runOnUiThread {
                         val batteryText = this.view!!.findViewById<TextView>(R.id.lblBattery)
-                        batteryText.text = batteryLvl.toString() + "%"
+                        batteryText.text = "$batteryLvl%"
                     }
                 }
 
@@ -293,7 +305,7 @@ class OptionsMenu: Fragment() {
                 .setOnBatteryLevelChangeListener { _: BluetoothReader, batteryLvl: Int ->
                     activity!!.runOnUiThread {
                         val batteryText = this.view!!.findViewById<TextView>(R.id.lblBattery)
-                        batteryText.text = batteryLvl.toString() + "%"
+                        batteryText.text = "$batteryLvl%"
                     }
                 }
         }

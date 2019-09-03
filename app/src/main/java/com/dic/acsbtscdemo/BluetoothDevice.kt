@@ -12,6 +12,11 @@ import android.widget.Toast
 import com.acs.bluetooth.BluetoothReaderManager
 import kotlinx.android.synthetic.main.component_bluetooth_device.view.*
 
+/**
+ * Class represents one bluetooth device discovered during scanning
+ * @author DIC
+ * @version 1.0.0
+ */
 
 class BtDevice(context:Context) : LinearLayout(context){
 
@@ -31,6 +36,7 @@ class BtDevice(context:Context) : LinearLayout(context){
             }
         }
     }
+
 
     fun setBluetoothDevice(device:BluetoothDevice){
         btDevice = device

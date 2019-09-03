@@ -1,5 +1,10 @@
 package com.dic.acsbtscdemo
 
+/**
+ * Implements functions to create a Felica command for use for smart-tag.
+ * @author AIOI SYSTEMS CO., LTD.
+ * @version 1.0.0
+ */
 class FelicaCommand {
 
     val BLOCKSIZE:Int = 16
@@ -9,10 +14,10 @@ class FelicaCommand {
     }
 
     fun createPacketForWrite(idm:ByteArray, blockData:ByteArray, addLength:Boolean):ByteArray{
-        var blocks:Int = (blockData.count() + BLOCKSIZE - 1)/BLOCKSIZE
+        val blocks:Int = (blockData.count() + BLOCKSIZE - 1)/BLOCKSIZE
 
         //3-byte block list
-        var blockList = ByteArray(blocks*3)
+        val blockList = ByteArray(blocks*3)
         for (i in 0 until blocks){
             blockList[i*3] = 0x00
             blockList[i*3+1] = i.toByte()
@@ -25,8 +30,8 @@ class FelicaCommand {
             len+=1
         }
 
-        var packet = ByteArray(len)
-        var pos:Int = 0
+        val packet = ByteArray(len)
+        var pos = 0
         if(addLength){
             packet[0] = len.toByte()
             pos+=1
@@ -74,7 +79,7 @@ class FelicaCommand {
     fun createPacketForRead(idm: ByteArray, blocks:Int, addLength:Boolean):ByteArray{
 
         //3 byte block list
-        var blockList = ByteArray(blocks*3)
+        val blockList = ByteArray(blocks*3)
         for(i in 0 until blocks){
             blockList[i*3] = 0x00
             blockList[i*3+1] = i.toByte()
@@ -86,8 +91,8 @@ class FelicaCommand {
         if(addLength){
             len+=1
         }
-        var packet = ByteArray(len)
-        var pos:Int = 0
+        val packet = ByteArray(len)
+        var pos = 0
         if(addLength){
             packet[0] = len.toByte()
             pos = 1
@@ -136,7 +141,7 @@ class FelicaCommand {
             return null
         }
         val blockCount = (response[minLen-1]).toInt()
-        var blockData = ByteArray(blockCount*BLOCKSIZE)
+        val blockData = ByteArray(blockCount*BLOCKSIZE)
 
         if(response.count()<(minLen+blockData.count())){
             return null

@@ -18,18 +18,22 @@ import kotlin.concurrent.thread
 import kotlin.experimental.and
 import kotlin.experimental.or
 
-
+/**
+ * Logic for various smartcard capability
+ * @author DIC
+ * @version 1.0.0
+ */
 class SmartTagCore(messageHandler: Handler){
-    val builder = CommandBuilder()
-    val felica = FelicaCommand()
+    private val builder = CommandBuilder()
+    private val felica = FelicaCommand()
     private lateinit var idm:ByteArray
     private lateinit var cmdList:ArrayList<ByteArray>
     private var cmdListCount = 0
     private var cmdErrorCount = 0
     lateinit var bmpByte:ByteArray
     var inputText:String = ""
-    val BLOCK_SIZE = 16
-    var readSize = 0
+    private val BLOCK_SIZE = 16
+    private var readSize = 0
 
     enum class MessageType(val value:Int){ Toast(0), EditBox(1), Progress(2), Error(3)}
     enum class Process{ Nothing, ShowDemo, ShowImage, ClearDisplay, WriteData, ReadUserData, CardResponse, ProcessRead, DisplayImage }
@@ -38,6 +42,8 @@ class SmartTagCore(messageHandler: Handler){
     var process = Process.Nothing
     private var prep = PreProcess.Nothing
     private val mHandler = messageHandler
+
+    //init defines all logic process that the smart card to handle when running the app
     init{
         builder.maxBlocks = 12
         (BluetoothInstance.reader as Acr1255uj1Reader).setOnResponseApduAvailableListener { reader: BluetoothReader, apdu: ByteArray, errorCode: Int ->
@@ -60,6 +66,7 @@ class SmartTagCore(messageHandler: Handler){
                             Process.WriteData -> writeData()
                             Process.ReadUserData -> readUserDataCmd(0, 176)
                             Process.DisplayImage -> showImage()
+                            else -> {}
                         }
                     }
                     else if(byte0 == 0x00.toByte() && byte1 == 0x90.toByte()){
@@ -73,30 +80,36 @@ class SmartTagCore(messageHandler: Handler){
                                 processCompleted()
                             }
                             Process.Nothing->{}
+                            else -> {}
                         }
                     }
                     else{
-                        //TODO:return error to UI
+                        val msg = mHandler.obtainMessage(MessageType.Toast.value, "Status error")
+                        msg.sendToTarget()
                     }
                 }
                 PreProcess.Nothing ->{ }
                 PreProcess.ProcessingLongTask ->{
-
+                    //this process is used for one batch of command sequences with multiples of individual command
+                    //awaits for return apdu and checks for no error
                     val byte0 = apdu[apdu.count()-1]
                     val byte1 = apdu[apdu.count()-2]
                     //check if there's error in response apdu
                     if(byte0 == 0x00.toByte() && byte1 == 0x00.toByte()) {
                         if(cmdListCount < cmdList.size){
+                            cmdErrorCount = 0
+                            cmdListCount++
                             showImageBytesSend(idm, cmdList[cmdListCount])
-                            val pcount = (cmdListCount*100/44)
-                            progressUpdate(pcount)
                         }
                         else{
                             prep = PreProcess.Nothing
-                            //100% closes progress dialog
-                            progressUpdate(100)
                             processCompleted()
                         }
+                        val pcount = (cmdListCount*100/44)
+                        if(cmdListCount < 43)
+                            progressUpdate(pcount)
+                        else
+                            progressUpdate(100)
                     }
                     else if(cmdListCount > 5){
                         prep = PreProcess.Nothing
@@ -122,6 +135,7 @@ class SmartTagCore(messageHandler: Handler){
         return demoCount.toByte()
     }
 
+    //Always 1st command send before any process begin
     fun startProcess(){
         //get idm
         val cmd = BluetoothInstance.byteArrayOfInts(0xFF, 0xCA, 0x00, 0x00, 0x00)
@@ -129,6 +143,7 @@ class SmartTagCore(messageHandler: Handler){
         prep = PreProcess.GetIdm
     }
 
+    //Always 2nd command send before any process begin
     private fun checkStatus(){
         val param = BluetoothInstance.byteArrayOfInts(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
         val cmd = builder.buildCommand(CommandBuilder.COMMAND_CHECK_STATUS, param)
@@ -137,6 +152,7 @@ class SmartTagCore(messageHandler: Handler){
         prep = PreProcess.CheckStatus
     }
 
+    //smart card to show demo image with running number
     private fun showDemo(){
         val msg = mHandler.obtainMessage(MessageType.Toast.value, "Demo image $demoCount")
         msg.sendToTarget()
@@ -148,8 +164,9 @@ class SmartTagCore(messageHandler: Handler){
 
     }
 
+    //smart card to show bmp image. Uses long process to transmit a sequence of 44 byte array commands
     private fun showImage(){
-        var msg = mHandler.obtainMessage(MessageType.Toast.value, "Writing image data")
+        val msg = mHandler.obtainMessage(MessageType.Toast.value, "Writing image data")
         msg.sendToTarget()
 
         val pos = convertTo3Bytes(0,0)
@@ -164,12 +181,13 @@ class SmartTagCore(messageHandler: Handler){
         progressUpdate(0)
     }
 
+    //Used by long process to transmit only one set of byte array command
     private fun showImageBytesSend(idm:ByteArray, cmdListElement:ByteArray){
         val fcmd = felica.createPacketForWrite(idm,cmdListElement)
         BluetoothInstance.reader!!.transmitApdu(fcmd)
-        cmdListCount++
     }
 
+    //clears the e-paper display
     private fun clearDisplay(){
         val param = BluetoothInstance.byteArrayOfInts(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
         val cmd = builder.buildCommand(CommandBuilder.COMMAND_CLEAR, param)
@@ -178,16 +196,16 @@ class SmartTagCore(messageHandler: Handler){
         processCompleted()
     }
 
+    //writes text byte representation into smart card memory
     private fun writeData(){
-
         val param = ByteArray(128){0x00}
         val text = inputText.toByteArray(Charsets.UTF_8)
 
+        //clears first 128 bytes of previously in memory chars. Chars after that will not be overwritten
         val lastIndex = when {
             inputText.length < 128 -> inputText.length
             else -> 128
         }
-
         text.copyInto(param,0,0,lastIndex)
         val cmd = builder.buildDataWriteCommand(0, param)
         for(i in cmd){
@@ -198,11 +216,12 @@ class SmartTagCore(messageHandler: Handler){
         processCompleted()
     }
 
+    //read user written data from memory
     private fun readUserDataCmd(startAddress:Int, sizeToRead:Int){
 
         val maxReadLength = (builder.maxBlocks * BLOCK_SIZE) - BLOCK_SIZE
         val splitcount = (sizeToRead + maxReadLength - 1)/maxReadLength
-        var dataLen = 0
+        var dataLen:Int
         if(sizeToRead > maxReadLength)
             dataLen = maxReadLength
         else
@@ -259,6 +278,7 @@ class SmartTagCore(messageHandler: Handler){
         process = Process.ProcessRead
     }
 
+    //sends data stored in smart card memory to UI thread and display it in alert box
     private fun processRead(data:ByteArray){
         if(data[data.count()-2] == 0x90.toByte() && data[data.count()-1] == 0x00.toByte()){
 
@@ -276,11 +296,13 @@ class SmartTagCore(messageHandler: Handler){
         msg.sendToTarget()
     }
 
+    //send realtime progress data to ui thread
     private fun progressUpdate(num:Int){
         val msg = mHandler.obtainMessage(MessageType.Progress.value, num)
         msg.sendToTarget()
     }
 
+    //convert 2 integers into 3 bytes. Uses to convert position and dimension
     private fun convertTo3Bytes(a: Int, b: Int): ByteArray {
         val result = ByteArray(3)
         result[0] = (a and 0x000FFF shr 4).toByte()
@@ -294,6 +316,7 @@ class SmartTagCore(messageHandler: Handler){
         return result
     }
 
+    //for debugging
     fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
 

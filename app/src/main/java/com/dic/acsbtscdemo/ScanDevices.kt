@@ -1,31 +1,26 @@
 package com.dic.acsbtscdemo
-
-
-import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
-import android.content.DialogInterface
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.component_bluetooth_device.view.*
-import android.support.v4.view.accessibility.AccessibilityEventCompat.setAction
 import android.content.Intent
 
-
+/**
+ * Fragments that handles discovering all bluetooth devices
+ * @author DIC
+ * @version 1.0.0
+ */
 
 class ScanDevices : Fragment(){
 
@@ -68,10 +63,19 @@ class ScanDevices : Fragment(){
 
         override fun onScanFailed(errorCode: Int) {
             super.onScanFailed(errorCode)
-            Toast.makeText(
-                activity,"onScanFailed()",
-                Toast.LENGTH_SHORT
-            ).show()
+            if(errorCode == 1){
+                Toast.makeText(
+                    activity,"Scanning..." ,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            else{
+                Toast.makeText(
+                    activity,"onScanFailed() with code $errorCode" ,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
         }
 
     }
@@ -98,6 +102,7 @@ class ScanDevices : Fragment(){
         BluetoothInstance.adapter?.bluetoothLeScanner?.stopScan(scanCallback)
     }
 
+    //init device and checks if it is BT LE compatible
     private fun initBluetooth(){
 
         if(!BluetoothAdapter.getDefaultAdapter().isEnabled){

@@ -10,7 +10,11 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.widget.*
 import kotlin.system.exitProcess
-
+/**
+ * Main activity handles all fragment activity
+ * @author DIC
+ * @version 1.0.0
+ */
 class MainActivity : AppCompatActivity() {
 
     private var viewPager:ViewPager? = null
@@ -27,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         android.Manifest.permission.READ_EXTERNAL_STORAGE,
         android.Manifest.permission.BLUETOOTH,
         android.Manifest.permission.ACCESS_COARSE_LOCATION
-
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,9 +48,12 @@ class MainActivity : AppCompatActivity() {
         replaceViewFragment(FragmentId.OptionsMenu)
     }
 
+
     override fun onBackPressed() {
 
         val menuFragment = supportFragmentManager.findFragmentByTag("OptionsMenu")
+
+        //Required user to press back twice if other fragment view other than Options Menu was shown
         if(menuFragment == null || menuFragment.isHidden){
             Toast.makeText(this, "Press back again to quit", Toast.LENGTH_SHORT).show()
             replaceViewFragment(FragmentId.OptionsMenu)
@@ -82,6 +88,8 @@ class MainActivity : AppCompatActivity() {
         val scnfrag = supportFragmentManager.findFragmentByTag("ScanDevices")
         val optfrag = supportFragmentManager.findFragmentByTag("OptionsMenu")
         val crtfrag = supportFragmentManager.findFragmentByTag("CreateTag")
+
+        //determine which fragment to be shown when button is pressed
         when(id){
              FragmentId.ScanDevices-> {
                  scanDevices = ScanDevices()
@@ -125,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
+    //check if the app has permission and request user to enable it
     fun hasNoPermissions(): Boolean {
         return ContextCompat.checkSelfPermission(
             this,
